@@ -1,0 +1,21 @@
+{
+    "name": "maurice2k/zenplate",
+    "description": "Simple and fast PHP based template engine",
+    "license": "LGPL-3.0",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Moritz Fain",
+            "email": "moritz@mertinkat.net"
+        }
+    ],
+    "require": {
+        "php": ">=5.3"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Maurice\\Zenplate\\": "src/"
+        }
+    }
+}
