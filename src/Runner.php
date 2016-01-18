@@ -3,7 +3,7 @@
 /**
  * Zenplate -- Simple and fast PHP based template engine
  *
- * Copyright 2008-2015 by Moritz Fain
+ * Copyright 2008-2016 by Moritz Fain
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ use Maurice\Zenplate\Exception\ExecuteException;
  * Simple and fast PHP based template engine
  *
  * @author Moritz Fain
- * @version 0.4
+ * @version 0.4.1
  * @license LGPL (http://www.gnu.org/licenses/lgpl.html)
  */
 class Runner

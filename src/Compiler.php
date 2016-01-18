@@ -3,7 +3,7 @@
 /**
  * Zenplate -- Simple and fast PHP based template engine
  *
- * Copyright 2008-2015 by Moritz Fain
+ * Copyright 2008-2016 by Moritz Fain
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ use Maurice\Zenplate\Exception\ParseException;
  * Simple and fast PHP based template engine
  *
  * @author Moritz Fain
- * @version 0.4
+ * @version 0.4.1
  * @license LGPL (http://www.gnu.org/licenses/lgpl.html)
  */
 class Compiler
@@ -72,7 +72,7 @@ class Compiler
      *
      * @var string
      */
-    public $version = '0.4';
+    public $version = '0.4.1';
 
     /**
      * Left delimiter used for the template tags
@@ -94,6 +94,13 @@ class Compiler
      * @var string
      */
     public $supportedIfFuncs = ['strlen', 'strtoupper', 'strtolower'];
+
+    /**
+     * Used variables
+     *
+     * @var array
+     */
+    protected $usedVariables = [];
 
     protected $offset = 0;
     protected $output = '';
@@ -207,6 +214,7 @@ class Compiler
         $this->offset = 0;
         $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . @strftime("%Y-%m-%d %H:%M:%S %Z") . ' */' . "\n?>\n";
         $this->errorList = [];
+        $this->usedVariables = [];
 
         $lastOffset = $this->offset;
 
@@ -284,6 +292,16 @@ class Compiler
     }
 
     /**
+     * Returns used variables
+     *
+     * @return array
+     */
+    public function getUsedVariables()
+    {
+        return array_keys($this->usedVariables);
+    }
+
+    /**
      * Parses a variable from template input
      *
      * @param  integer $testOffset Offset to test for correct variable
@@ -316,18 +334,20 @@ class Compiler
      */
     protected function replaceVariable($variable, $inline)
     {
-        if (preg_match_all('/(%[a-zA-Z0-9_]+|' . $this->varBracketRegexp . '|' . $this->varSelectorRegexp . ')/', $variable, $tmp)) {
+        if (preg_match_all('/(%[a-zA-Z0-9_]+|' . $this->varBracketRegexp . '|' . $this->varSelectorRegexp . ')/', $variable, $matches)) {
 
             $output = '';
 
-            for ($i = 0, $max = count($tmp[1]); $i < $max; ++$i) {
+            for ($i = 0, $max = count($matches[1]); $i < $max; ++$i) {
 
+                $name = substr($matches[1][$i], 1);
                 if ($i == 0) {
-                    $output .= '$this->vars[\'' . substr($tmp[1][$i], 1) . '\']';
-                } else if ($tmp[1][$i] != '' && $tmp[1][$i]{0} == '.') {
-                    $output .= '[\'' . substr($tmp[1][$i], 1) . '\']';
-                } else if ($tmp[1][$i] != '' && $tmp[1][$i]{0} == '[') {
-                    $output .= $tmp[1][$i];
+                    $this->usedVariables[$name] = true;
+                    $output .= '$this->vars[\'' . $name . '\']';
+                } else if ($matches[1][$i] != '' && $matches[1][$i]{0} == '.') {
+                    $output .= '[\'' . $name . '\']';
+                } else if ($matches[1][$i] != '' && $matches[1][$i]{0} == '[') {
+                    $output .= $matches[1][$i];
                 }
 
             }
