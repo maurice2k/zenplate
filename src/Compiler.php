@@ -344,9 +344,9 @@ class Compiler
                 if ($i == 0) {
                     $this->usedVariables[$name] = true;
                     $output .= '$this->vars[\'' . $name . '\']';
-                } else if ($matches[1][$i] != '' && $matches[1][$i]{0} == '.') {
+                } else if ($matches[1][$i] != '' && $matches[1][$i][0] == '.') {
                     $output .= '[\'' . $name . '\']';
-                } else if ($matches[1][$i] != '' && $matches[1][$i]{0} == '[') {
+                } else if ($matches[1][$i] != '' && $matches[1][$i][0] == '[') {
                     $output .= $matches[1][$i];
                 }
 
