@@ -203,16 +203,16 @@ class Compiler
     /**
      * Compiles template
      *
-     * @param  string $template Template
+     * @param  string|null $template Template
      * @throws \RuntimeException
      * @return mixed The compiled template if no errors occured, false otherwise (get errors with "get_errors()" method)
      */
-    public function compile($template)
+    public function compile(?string $template)
     {
-        $this->template = $template;
-        $this->templateLength = strlen($this->template ?? '');
+        $this->template = $template ?? '';
+        $this->templateLength = strlen($this->template);
         $this->offset = 0;
-        $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . @strftime("%Y-%m-%d %H:%M:%S %Z") . ' */' . "\n?>\n";
+        $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . date("Y-m-d H:i:s") . ' */' . "\n?>\n";
         $this->errorList = [];
         $this->usedVariables = [];
 

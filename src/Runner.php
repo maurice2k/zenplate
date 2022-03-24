@@ -68,7 +68,7 @@ class Runner
     public function run($template)
     {
         $compiler = new Compiler();
-        $output = $compiler->compile($template);
+        $output = $compiler->compile((string)$template);
 
         if ($output === false) {
             $errorMessages = implode(', ', array_map(function($item) {return $item['message'];}, $compiler->getErrors()));
