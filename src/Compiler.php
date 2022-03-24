@@ -212,7 +212,7 @@ class Compiler
         $this->template = $template ?? '';
         $this->templateLength = strlen($this->template);
         $this->offset = 0;
-        $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . date("Y-m-d H:i:s") . ' */' . "\n?>\n";
+        $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . date('c') . ' */' . "\n?>\n";
         $this->errorList = [];
         $this->usedVariables = [];
 
