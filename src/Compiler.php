@@ -210,7 +210,7 @@ class Compiler
     public function compile($template)
     {
         $this->template = $template;
-        $this->templateLength = strlen($this->template);
+        $this->templateLength = strlen($this->template ?? '');
         $this->offset = 0;
         $this->output = '<?php /* zenplate version ' . $this->version . ', created on ' . @strftime("%Y-%m-%d %H:%M:%S %Z") . ' */' . "\n?>\n";
         $this->errorList = [];
