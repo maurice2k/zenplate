@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Maurice\Zenplate\Exception;
 
-class ExecuteException extends \RuntimeException implements ExceptionInterface
+final class ExecuteException extends \RuntimeException implements ExceptionInterface
 {
 }

@@ -1,0 +1,13 @@
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: tests/Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    image: zenplate-test:${PHP_VERSION:-8.1}
+    working_dir: /app
+    volumes:
+      - ..:/app
+      - /app/vendor
+    command: ["vendor/bin/phpunit", "-c", "tests/phpunit.xml", "--colors=always"]

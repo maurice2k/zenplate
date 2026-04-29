@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Zenplate -- Simple and fast PHP based template engine
  *
- * Copyright 2008-2016 by Moritz Fain
+ * Copyright 2008-2026 by Moritz Fain
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,89 +26,77 @@ namespace Maurice\Zenplate;
 
 use Maurice\Zenplate\Exception\ExecuteException;
 
-/**
- * Zenplate runner
- *
- * Simple and fast PHP based template engine
- *
- * @author Moritz Fain
- * @version 0.4.1
- * @license LGPL (http://www.gnu.org/licenses/lgpl.html)
- */
 class Runner
 {
-    /**
-     * Assigned variables
-     *
-     * @var array
-     */
-    protected $vars = [];
+    /** @var array<string,mixed> */
+    protected array $vars = [];
+
+    private ?Compiler $compiler = null;
 
     /**
-     * Assigns variables
+     * Assign one or many template variables.
      *
-     * @param  mixed $key Key (may also be an associative array in which case $value must not be given)
-     * @param  string $value Value
-     * @return void
+     * @param string|array<string,mixed> $key   A single variable name, or an associative array of name => value.
+     * @param mixed                      $value Ignored when $key is an array.
      */
-    public function assign($key, $value = null)
+    public function assign(string|array $key, mixed $value = null): void
     {
-        if ($value === null && is_array($key)) {
+        if (is_array($key)) {
             $this->vars = array_merge($this->vars, $key);
-        } else if (is_string($key)) {
-            $this->vars[$key] = $value;
+            return;
         }
+
+        $this->vars[$key] = $value;
     }
 
     /**
-     * Compiles and runs a template
+     * Compile and run a template.
      *
-     * @param  string $template Template
-     * @return string The parsed template with variables replaced
-     * @throws ExecuteException if there are errors during compilation
+     * @throws ExecuteException When compilation fails or the generated PHP throws.
      */
-    public function run($template)
+    public function run(string $template): string
     {
-        $compiler = new Compiler();
-        $output = $compiler->compile((string)$template);
+        $compiler = $this->compiler ??= new Compiler();
+        $output = $compiler->compile($template);
 
         if ($output === false) {
-            $errorMessages = implode(', ', array_map(function($item) {return $item['message'];}, $compiler->getErrors()));
+            $errorMessages = implode(', ', array_map(static fn(array $item): string => $item['message'], $compiler->getErrors()));
             throw new ExecuteException('Error compiling template; error messages: ' . $errorMessages);
         }
 
-        ob_start();
-        $res = @eval('?>' . $output);
-
-        if ($res === false) {
-            throw new ExecuteException('Error running template; this is a serious problem (PHP parse error)');
-        }
-
-        return ob_get_clean();
+        return $this->evaluate($output);
     }
 
     /**
-     * Runs a compiled template
+     * Run a previously compiled template (output of Compiler::compile()).
      *
-     * @param string $compiledTemplate Compiled template
-     * @return string The parsed template with variables replaced
-     * @throws ExecuteException if the given compiled template has no zenplate header
+     * @throws ExecuteException When the input lacks a Zenplate header or eval throws.
      */
-    public function runCompiled($compiledTemplate)
+    public function runCompiled(string $compiledTemplate): string
     {
-        if (strpos($compiledTemplate, '<?php /* zenplate') === 0) {
-
-            ob_start();
-            $res = @eval('?>' . $compiledTemplate);
-
-            if ($res === false) {
-                throw new ExecuteException('Error running template; this is a serious problem (PHP parse error)');
-            }
-
-            return ob_get_clean();
-
-        } else {
+        if (!str_starts_with($compiledTemplate, '<?php /* zenplate')) {
             throw new ExecuteException('Not a valid zenplate compiled template!');
         }
+
+        return $this->evaluate($compiledTemplate);
+    }
+
+    /**
+     * @throws ExecuteException
+     */
+    private function evaluate(string $compiled): string
+    {
+        ob_start();
+        try {
+            eval('?>' . $compiled);
+        } catch (\ParseError $e) {
+            ob_end_clean();
+            throw new ExecuteException('Error running template; PHP parse error: ' . $e->getMessage(), 0, $e);
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw new ExecuteException('Error running template: ' . $e->getMessage(), 0, $e);
+        }
+
+        return (string)ob_get_clean();
     }
 }
